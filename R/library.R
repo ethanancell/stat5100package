@@ -1,12 +1,17 @@
-fit_plot <- function(lmobject, data) {
+#' (Stat 5100 function) Plot a scatterplot of the original data with a
+#' regression line overlaid on top. This can help you decide on how well a
+#' regression line fits the data.
+#'
+#' @param lmobject An object of type 'lm' created from the lm() function.
+#' @return A plot object of the regression model and the original data.
+fit_plot <- function(lmobject) {
 
   # Error check
   if (missing(lmobject)) {
     stop("Function fit_plot() is missing a linear model object.")
   }
-  if (missing(data)) {
-    stop("Function fit_plot() is missing the data argument.")
-  }
+
+  data = lmobject$model
 
   # Make sure there is only one predictor
   term_length <- length(lmobject$terms) - 1
@@ -30,6 +35,11 @@ fit_plot <- function(lmobject, data) {
     ggplot2::ggtitle("Fit plot for linear model")
 }
 
+#' (Stat 5100 function) Obtain a residual plot for a linear model. This helps you decide on the
+#' appropriateness of linear regression model assumptions.
+#'
+#' @param lmobject An object of type 'lm' created from the lm() function.
+#' @return A plot object of the residuals plotted against the fitted values.
 residual_plot <- function(lmobject) {
 
   plotdata <- data.frame(resid = lmobject$resid,
@@ -50,20 +60,40 @@ seq_plot <- function(lmobject) {
     ggplot2::ggtitle("Sequence plot of residuals and predicted values")
 }
 
+#' (Stat 5100 function) Obtain a histogram of residuals for a linear model.
+#' This function also plots a normal curve on top of the histogram with the
+#' same mean and standard deviation. This helps you assess the validity of the
+#' normality assumption of residuals in linear regression.
+#'
+#' @param lmobject A linear model object from the lm() function.
+#' @return A histogram of the residuals along with a theoretical normal curve
+#' with the same mean and standard deviation.
 residual_hist <- function(lmobject) {
   ggplot2::ggplot(data = data.frame(resid = lmobject$resid)) +
     ggplot2::geom_histogram(ggplot2::aes(x = resid, y = ..density..),
                             bins = 20) +
     ggplot2::stat_function(fun = dnorm, args = list(mean = 0,
-                                                    sd = sd(lmobject$resid)))
+                                                    sd = sd(lmobject$resid))) +
+    ggplot2::ggtitle("Residual histogram with theoretical normal distribution")
 }
 
+#' (Stat 5100 function) Obtain a QQ plot for a linear model. This plot can
+#' help you assess the normality assumption of a linear regression model. This
+#' plot will plot theoretical quantiles of a normal distribution against the
+#' residuals.
+#'
+#' @param lmobject A linear model object from the lm() function.
+#' @return A QQ plot object.
 qq_plot <- function(lmobject) {
   ggplot2::ggplot(data = data.frame(resid = lmobject$resid)) +
     ggplot2::geom_qq(ggplot2::aes(sample = resid)) +
     ggplot2::geom_qq_line(ggplot2::aes(sample = resid))
 }
 
+#' Obtain ANOVA statistics for a linear model.
+#'
+#' @param lmobject A linear model object from the lm() function.
+#' @return A dataframe with various labelled ANOVA statistics.
 anova_lm <- function(lmobject) {
 
   # By default gives scientific numbers which might be hard to read,
