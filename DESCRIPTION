@@ -1,11 +1,14 @@
 Package: stat5100
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Stat 5100 Supplementary R Package
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Authors@R: person("First", "Last", email = "ethan.ancell@aggiemail.usu.edu",
+                  role = c("aut", "cre"))
+Maintainer: Ethan Ancell <ethan.ancell@aggiemail.usu.edu>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+Imports:
+    tidyverse
