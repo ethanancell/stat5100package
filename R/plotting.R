@@ -67,7 +67,7 @@ seq_plot <- function(lmobject, ...) {
 #' @return A histogram of the residuals along with a theoretical normal curve
 #' with the same mean and standard deviation.
 residual_hist <- function(lmobject, ...) {
-  hist(lmobject$resid, breaks = sqrt(length(lmobject$resid)), freq = FALSE)
+  hist(lmobject$resid, breaks = sqrt(length(lmobject$resid)), freq = FALSE, ...)
 
   # Draw the normal curve with mean 0 and same standard deviation as residuals
   x <- seq(min(lmobject$resid), max(lmobject$resid), length = 400)
