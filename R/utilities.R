@@ -1,3 +1,39 @@
+#' (Stat 5100) F-test for lack of fit. A test for determining if too much
+#' of the error in prediction is due to the lack of model fit.
+#'
+#' @param lmobject A linear model object from the lm() function.
+#' @return An ANOVA result that gives an F-statistic and p-value for this
+#' test.
+ftest_lackfit_lm <- function(lmobject) {
+
+  # get name of response
+  response <- lmobject$terms[[2]]
+
+  # Get a list of every single model term
+  var_names <- variable.names(lmobject)
+  var_names <- var_names[2:length(var_names)]
+
+  # Turn all of the variables into factors
+  mod_dataframe <- lmobject$model
+  for (i in 1:length(var_names)) {
+    mod_dataframe[[var_names[i]]] <- as.factor(mod_dataframe[[var_names[i]]])
+  }
+
+  # Loop through all the variable names and add them on as crossed factors
+  # into the string
+  current_formula <- paste(response, " ~ ", var_names[1])
+  if (length(var_names) > 1) {
+    for (i in 2:length(var_names)) {
+      current_formula <- paste(current_formula, "*", var_names[i], sep = "")
+    }
+  }
+
+  # Create a linear model with the newly crossed factors, and then we ANOVA
+  # that with our original linear model for our final result
+  factor_cross_lm <- lm(as.formula(current_formula), data = mod_dataframe)
+  anova(lmobject, factor_cross_lm)
+}
+
 #' (Stat 5100) Brown-Forsythe test for constant variance in the residuals.
 #'
 #' This function splits the data into two halves based upon the median

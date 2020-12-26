@@ -5,7 +5,9 @@ Version: 0.1.0
 Authors@R: person("First", "Last", email = "ethan.ancell@aggiemail.usu.edu",
                   role = c("aut", "cre"))
 Maintainer: Ethan Ancell <ethan.ancell@aggiemail.usu.edu>
-Description: This package creates
+Description: This package is intended to be used in the Stat 5100 course at
+    Utah State University. This package contains all data and functions
+    needed to complete the course using R.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
