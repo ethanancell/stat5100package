@@ -53,7 +53,7 @@ brown_forsythe_lm <- function(lmobject) {
   median_pred <- median(lmobject$fitted.values)
   group_B <- lmobject$fitted.values > median_pred
 
-  bf_test_df <- data.frame(resid = lmobject_lm$residuals,
+  bf_test_df <- data.frame(resid = lmobject$residuals,
                            group = rep("A", length(lmobject$residuals)))
   bf_test_df$group[group_B] <- "B"
   bf_test_df$group <- as.factor(bf_test_df$group)
