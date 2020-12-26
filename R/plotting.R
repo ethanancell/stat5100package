@@ -58,6 +58,20 @@ seq_plot <- function(lmobject, ...) {
   lines(plotdata$order.in.data, plotdata$resid)
 }
 
+#' (Stat 5100 function) A combination of the 4 main graphical checks to
+#' assess whether model assumptions are satisfied or not. This is a way
+#' to clean up the code and make it a bit easier.
+#'
+#' @param lmobject The linear model object from the lm() function
+#' @return A 2x2 plot with some main graphical checks we use.
+visual_assumptions <- function(lmobject, ...) {
+  par(mfrow = c(2, 2))
+  seq_plot(lmobject, main = "Sequence plot", ...)
+  qq_plot(lmobject, main = "QQ Plot", ...)
+  residual_hist(lmobject, main = "Residual histogram", ...)
+  residual_plot(lmobject, main = "Residual plot", ...)
+}
+
 #' (Stat 5100 function) Obtain a histogram of residuals for a linear model.
 #' This function also plots a normal curve on top of the histogram with the
 #' same mean and standard deviation. This helps you assess the validity of the
