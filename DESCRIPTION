@@ -5,8 +5,7 @@ Version: 0.1.0
 Authors@R: person("First", "Last", email = "ethan.ancell@aggiemail.usu.edu",
                   role = c("aut", "cre"))
 Maintainer: Ethan Ancell <ethan.ancell@aggiemail.usu.edu>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: This package creates
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
