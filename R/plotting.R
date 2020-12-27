@@ -70,6 +70,8 @@ visual_assumptions <- function(lmobject, ...) {
   qq_plot(lmobject, main = "QQ Plot", ...)
   residual_hist(lmobject, main = "Residual histogram", ...)
   residual_plot(lmobject, main = "Residual plot", ...)
+
+  par(mfrow = c(1,1))
 }
 
 #' (Stat 5100 function) Obtain a histogram of residuals for a linear model.
