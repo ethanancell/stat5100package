@@ -17,16 +17,22 @@ fit_plot <- function(lmobject, ...) {
   term_length <- length(lmobject$terms) - 1
   if (term_length > 2) {
     stop("Function fit_plot() requires that the linear model has only
-         one reponse variable and one predictor variable.")
+         one response variable and one predictor variable.")
   }
 
   # Get names in the linear model
   yname <- toString(lmobject$terms[[2]])
-  xname <- toString(lmobject$terms[[3]])
+  xname <- variable.names(lmobject)
 
-  # Get coefficient and intercept from linear model
-  intercept <- lmobject$coefficients[1]
-  coeff <- lmobject$coefficients[2]
+  intercept <- 0
+  coeff <- 0
+  # Give an exception for if there is no intercept in the model
+  if (length(lmobject$coefficients) == 1) {
+    coeff <- lmobject$coefficients[1]
+  } else {
+    intercept <- lmobject$coefficients[1]
+    coeff <- lmobject$coefficients[2]
+  }
 
   # Plot
   plot(data[[xname]], data[[yname]], ...)
