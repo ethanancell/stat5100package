@@ -84,7 +84,12 @@ brown_forsythe_lm <- function(lmobject) {
 #' @param confidence A level of confidence for the interval expressed as a proportion
 #' @return A coefficient matrix for the model that contains lower and upper
 #' confidence interval values for the coefficient estimate.
-coefficient_confidence_lm <- function(lmobject, confidence = 0.95) {
+coefficient_confidence_lm <- function(lmobject, confidence = 0.95, simul = FALSE) {
+  # Error check
+  if (confidence < 0 | confidence > 1) {
+    stop("confidence parameter must be a number between 0 and 1.")
+  }
+
   # To accomplish this, we simply grab the standard error from the
   # summary function as well as the critical value that gives the given
   # confidence level
@@ -92,10 +97,20 @@ coefficient_confidence_lm <- function(lmobject, confidence = 0.95) {
 
   out_mtx <- lm_sum$coefficients
   var_names <- row.names(out_mtx)
-  crit_value <- abs(qt((1 - confidence)/2, df = lmobject$df.residual))
+
+  g <- 1
+  if (simul == TRUE) {
+    g <- length(var_names)
+  }
 
   lower.est <- vector("numeric", length = length(var_names))
   upper.est <- vector("numeric", length = length(var_names))
+
+  alpha <- (1 - confidence) / g
+
+  # Calculate the coefficient estimates based upon the multiple hypothesis
+  # testing method
+  crit_value <- abs(qt(alpha/2, df = lmobject$df.residual))
 
   for (i in 1:length(var_names)) {
     # Estimate +- std.error * crit_value
@@ -104,7 +119,107 @@ coefficient_confidence_lm <- function(lmobject, confidence = 0.95) {
   }
 
   out_mtx <- cbind(out_mtx, lower.est, upper.est)
+
+  cat("lower.est and upper.est are the ", 100 - round(alpha*100, digits = 4),
+      "% confidence limits.\n", sep = "")
+  if (simul == TRUE) {
+    cat("The Bonferroni adjustment for simultaneous confidence levels was made.\n")
+  } else {
+    cat("There were no adjustments for simultaneous confidence levels.\n")
+  }
   out_mtx
+}
+
+#' (Stat 5100) confidence interval for the prediction of a single new observation
+#' given some known X-profile.
+#'
+#' @param lmobject The linear model object from the lm() function
+#' @param newdata A dataframe with columns named the same thing as the predictor variables
+#' used to create the model.
+#' @param confidence A number between 0 and 1 that indicates the confidence level
+simul_prediction_limits <- function(lmobject, newdata, confidence = 0.95) {
+  # Much the same as the mean prediction limits, except here I have to
+  # calculate the standard errors for the prediction manually
+  pred_frame <- predict(lmobject, newdata, se.fit = TRUE)
+  n <- nrow(lmobject$model) # Sample size
+
+  # Do this first:
+  # Get variable names and then include the X-profiles in the output dataset
+  var_names <- variable.names(lmobject)
+  var_names <- var_names[2:length(var_names)]
+
+  mydf <- data.frame(newdata[[var_names[1]]])
+  if (length(var_names) > 1) {
+    for (i in 2:length(var_names)) {
+      mydf <- cbind(mydf, newdata[[var_names[i]]])
+    }
+  }
+  names(mydf) <- var_names
+
+  # Now follow formula on page 5 of handout 2.3
+  SST <- sum(anova(lmobject)$`Sum Sq`)
+  MSE <- anova(lmobject)$`Mean Sq`[2]
+  # I'm pretty sure that this only works for a single predictor, because in
+  # the case of multiple parameters this formula doesn't quite work. I may
+  # have to adjust this later.
+  num <- (mydf[[var_names[1]]] - mean(lmobject$model[[var_names[1]]]))^2
+  se_yhat_pred <- sqrt(MSE) * (1 + 1/n + num/SST)
+
+  alpha <- 1 - confidence # Simultaneous confidence level
+  p <- lmobject$rank # Number of parameters
+  g <- nrow(newdata) # Number of simultaneous intervals
+  S <- sqrt(p * qf(1-alpha, g, n-p)) # Scheffe critical value
+  t <- qt(1 - alpha/(2*g), n-p) # Bonferroni critical value
+
+  yhat <- pred_frame$fit
+
+  S_upper <- yhat + S*se_yhat_pred
+  S_lower <- yhat - S*se_yhat_pred
+  B_upper <- yhat + t*se_yhat_pred
+  B_lower <- yhat - t*se_yhat_pred
+
+  cbind(mydf, yhat, se_yhat_pred, S_lower, S_upper, B_lower, B_upper)
+}
+
+#' (Stat 5100) confidence interval for the mean response variable at a given
+#' X-level.
+#'
+#' @param lmobject The linear model object from the lm() function
+#' @param newdata A dataframe with columns named the same thing as the predictor variables
+#' used to create the model.
+#' @param confidence A number between 0 and 1 that indicates the confidence level
+simul_mean_prediction_limits <- function(lmobject, newdata, confidence = 0.95) {
+  # Let predict.lm function do most the heavy lifting here
+  pred_frame <- predict(lmobject, newdata, se.fit = TRUE)
+
+  alpha <- 1 - confidence # Simultaneous confidence level
+  p <- lmobject$rank # Number of parameters
+  n <- nrow(lmobject$model) # Sample size
+  g <- nrow(newdata) # Number of simultaneous intervals
+  W <- sqrt(p * qf(1-alpha, p, n-p)) # WH critical value
+  t <- qt(1 - alpha/(2*g), n-p) # Bonferroni critical value
+
+  yhat <- pred_frame$fit
+  se_yhat <- pred_frame$se.fit
+
+  WH_upper <- yhat + W*se_yhat
+  WH_lower <- yhat - W*se_yhat
+  B_upper <- yhat + t*se_yhat
+  B_lower <- yhat - t*se_yhat
+
+  # Get variable names and then include the X-profiles in the output dataset
+  var_names <- variable.names(lmobject)
+  var_names <- var_names[2:length(var_names)]
+
+  mydf <- data.frame(newdata[[var_names[1]]])
+  if (length(var_names) > 1) {
+    for (i in 2:length(var_names)) {
+      mydf <- cbind(mydf, newdata[[var_names[i]]])
+    }
+  }
+  names(mydf) <- var_names
+
+  cbind(mydf, yhat, se_yhat, WH_lower, WH_upper, B_lower, B_upper)
 }
 
 #' (Stat 5100) Correlation test of normality function. This function will give
