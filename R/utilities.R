@@ -76,6 +76,37 @@ brown_forsythe_lm <- function(lmobject) {
               round(result$p.value, 4), sep = ""))
 }
 
+#' (Stat 5100) Calculate confidence intervals for the coefficients of a linear
+#' model. This function pulls info from the lm object and constructs a
+#' confidence interval of the form "coefficient est +- critical value * std error"
+#'
+#' @param lmobject A linear model object from the lm() function
+#' @param confidence A level of confidence for the interval expressed as a proportion
+#' @return A coefficient matrix for the model that contains lower and upper
+#' confidence interval values for the coefficient estimate.
+coefficient_confidence_lm <- function(lmobject, confidence = 0.95) {
+  # To accomplish this, we simply grab the standard error from the
+  # summary function as well as the critical value that gives the given
+  # confidence level
+  lm_sum <- summary(lmobject)
+
+  out_mtx <- lm_sum$coefficients
+  var_names <- row.names(out_mtx)
+  crit_value <- abs(qt((1 - confidence)/2, df = lmobject$df.residual))
+
+  lower.est <- vector("numeric", length = length(var_names))
+  upper.est <- vector("numeric", length = length(var_names))
+
+  for (i in 1:length(var_names)) {
+    # Estimate +- std.error * crit_value
+    lower.est[i] <- out_mtx[i, 1] - out_mtx[i, 2] * crit_value
+    upper.est[i] <- out_mtx[i, 1] + out_mtx[i, 2] * crit_value
+  }
+
+  out_mtx <- cbind(out_mtx, lower.est, upper.est)
+  out_mtx
+}
+
 #' (Stat 5100) Correlation test of normality function. This function will give
 #' output on the correlation between the residuals and the expected residuals
 #' under a normal distribution. Table B.6 from the notes will give you what
