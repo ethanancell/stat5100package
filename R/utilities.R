@@ -130,16 +130,21 @@ coefficient_confidence_lm <- function(lmobject, confidence = 0.95, simul = FALSE
   out_mtx
 }
 
-#' (Stat 5100) confidence interval for the prediction of a single new observation
-#' given some known X-profile.
+#' (Stat 5100) Get a confidence interval for an individual new prediction.
+#' Note that this is different from the confidence interval for the mean of
+#' the response variable at a particular X-profile.
 #'
-#' @param lmobject The linear model object from the lm() function
-#' @param newdata A dataframe with columns named the same thing as the predictor variables
-#' used to create the model.
-#' @param confidence A number between 0 and 1 that indicates the confidence level
+#' @param lmobject The linear model object from the lm() function.
+#' @param newdata A dataframe that contains the same variables used to train
+#' the lm object (no response variable needed).
+#' @param confidence The simultaneous confidence level for the predictions.
 simul_prediction_limits <- function(lmobject, newdata, confidence = 0.95) {
-  # Much the same as the mean prediction limits, except here I have to
-  # calculate the standard errors for the prediction manually
+  # I found this on stack overflow.... Apparently the best way to get the
+  # SE for an individual prediction
+  se_yhat_pred <- sqrt(predict(lmobject, newdata, se.fit = TRUE)$se.fit^2 +
+         predict(lmobject, newdata, se.fit = TRUE)$residual.scale^2)
+
+  # Grab the prediction frame
   pred_frame <- predict(lmobject, newdata, se.fit = TRUE)
   n <- nrow(lmobject$model) # Sample size
 
@@ -156,19 +161,12 @@ simul_prediction_limits <- function(lmobject, newdata, confidence = 0.95) {
   }
   names(mydf) <- var_names
 
-  # Now follow formula on page 5 of handout 2.3
-  SST <- sum(anova(lmobject)$`Sum Sq`)
-  MSE <- anova(lmobject)$`Mean Sq`[2]
-  # I'm pretty sure that this only works for a single predictor, because in
-  # the case of multiple parameters this formula doesn't quite work. I may
-  # have to adjust this later.
-  num <- (mydf[[var_names[1]]] - mean(lmobject$model[[var_names[1]]]))^2
-  se_yhat_pred <- sqrt(MSE) * (1 + 1/n + num/SST)
+  yhat <- pred_frame$fit
 
   alpha <- 1 - confidence # Simultaneous confidence level
   p <- lmobject$rank # Number of parameters
   g <- nrow(newdata) # Number of simultaneous intervals
-  S <- sqrt(p * qf(1-alpha, g, n-p)) # Scheffe critical value
+  S <- sqrt(g * qf(1-alpha, g, n-p)) # Scheffe critical value
   t <- qt(1 - alpha/(2*g), n-p) # Bonferroni critical value
 
   yhat <- pred_frame$fit

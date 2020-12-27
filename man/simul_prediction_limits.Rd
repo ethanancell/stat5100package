@@ -2,20 +2,22 @@
 % Please edit documentation in R/utilities.R
 \name{simul_prediction_limits}
 \alias{simul_prediction_limits}
-\title{(Stat 5100) confidence interval for the prediction of a single new observation
-given some known X-profile.}
+\title{(Stat 5100) Get a confidence interval for an individual new prediction.
+Note that this is different from the confidence interval for the mean of
+the response variable at a particular X-profile.}
 \usage{
 simul_prediction_limits(lmobject, newdata, confidence = 0.95)
 }
 \arguments{
-\item{lmobject}{The linear model object from the lm() function}
+\item{lmobject}{The linear model object from the lm() function.}
 
-\item{newdata}{A dataframe with columns named the same thing as the predictor variables
-used to create the model.}
+\item{newdata}{A dataframe that contains the same variables used to train
+the lm object (no response variable needed).}
 
-\item{confidence}{A number between 0 and 1 that indicates the confidence level}
+\item{confidence}{The simultaneous confidence level for the predictions.}
 }
 \description{
-(Stat 5100) confidence interval for the prediction of a single new observation
-given some known X-profile.
+(Stat 5100) Get a confidence interval for an individual new prediction.
+Note that this is different from the confidence interval for the mean of
+the response variable at a particular X-profile.
 }
