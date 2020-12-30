@@ -30,14 +30,18 @@ fit_plot <- function(lmobject, ...) {
   # Give an exception for if there is no intercept in the model
   if (length(lmobject$coefficients) == 1) {
     coeff <- lmobject$coefficients[1]
+
+    # Plot through origin
+    plot(data[[xname[1]]], data[[yname]], ...)
+    abline(a = 0, b = coeff)
   } else {
     intercept <- lmobject$coefficients[1]
     coeff <- lmobject$coefficients[2]
-  }
 
-  # Plot
-  plot(data[[xname[2]]], data[[yname]], ...)
-  abline(a = intercept, b = coeff)
+    # Plot normally
+    plot(data[[xname[2]]], data[[yname]], ...)
+    abline(a = intercept, b = coeff)
+  }
 }
 
 fit_plot_quadratic_model <- function(lmobject, ...) {
