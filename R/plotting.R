@@ -5,17 +5,18 @@
 #' @param lmobject An object of type 'lm' created from the lm() function.
 #' @return A plot object of the regression model and the original data.
 fit_plot <- function(lmobject, ...) {
-
   # Error check
   if (missing(lmobject)) {
     stop("Function fit_plot() is missing a linear model object.")
   }
 
-  data = lmobject$model
+  data <- lmobject$model
+  pred_names <- names(lmobject$coefficients)
 
-  # Make sure there is only one predictor
-  term_length <- length(lmobject$terms) - 1
-  if (term_length > 2) {
+  # Plot the first
+  # If there is more than one predictor,
+  num_predictors <- length(pred_names)
+  if (num_predictors > 2) {
     stop("Function fit_plot() requires that the linear model has only
          one response variable and one predictor variable.")
   }
@@ -35,7 +36,32 @@ fit_plot <- function(lmobject, ...) {
   }
 
   # Plot
-  plot(data[[xname]], data[[yname]], ...)
+  plot(data[[xname[2]]], data[[yname]], ...)
+  abline(a = intercept, b = coeff)
+}
+
+fit_plot_quadratic_model <- function(lmobject, ...) {
+
+  # Error check
+  if (missing(lmobject)) {
+    stop("Function fit_plot() is missing a linear model object.")
+  }
+  data <- lmobject$model
+  pred_names <- names(lmobject$coefficients)
+  num_predictors <- length(pred_names)
+  if (num_predictors > 3) {
+    stop("Function fit_plot() requires that the linear model has only
+         two response variables.")
+  }
+
+  # Get names in the linear model
+  yname <- toString(lmobject$terms[[2]])
+
+  # Create a sequence from minimum x to maximum x, and then predict at all
+  # the locations to get our quadratic curve
+
+  # Plot
+  plot(data[[pred_names[1]]], data[[yname]], ...)
   abline(a = intercept, b = coeff)
 }
 
