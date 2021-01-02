@@ -76,6 +76,12 @@ brown_forsythe_lm <- function(lmobject) {
               round(result$p.value, 4), sep = ""))
 }
 
+vif_glmnet <- function(glm_object) {
+  lambda_range <- glm_object$lambda
+
+  rXX <- cor(cbind())
+}
+
 #' (Stat 5100) Calculate confidence intervals for the coefficients of a linear
 #' model. This function pulls info from the lm object and constructs a
 #' confidence interval of the form "coefficient est +- critical value * std error"

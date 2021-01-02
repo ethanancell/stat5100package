@@ -127,6 +127,30 @@ residual_hist <- function(lmobject, ...) {
   lines(x, y)
 }
 
+#' Create simultaneous plots of the ridge constant plotted against both
+#' the variance inflation factor and the coefficient estimates. This can help
+#' you decide on an optimal ridge constant.
+#'
+#' @param ridgeobject An object of type "ridge" from the genridge package.
+ridge_vif_trace_plot <- function(ridgeobject) {
+
+  # Check to make sure is ridge object
+  if (class(ridgeobject) != "ridge") {
+    stop("ridgeobject parameter must be of type \"ridge\" from genridge package.")
+  }
+
+  vridge <- genridge::vif.ridge(ridgeobject)
+  pch <- c(15:18, 7, 9)
+
+  par(mfrow = c(2, 1))
+  matplot(rownames(vridge), vridge, type = 'b', xlab = "Ridge constant",
+          ylab = "Variance inflation", main = "Ridge Regression Analysis",
+          cex = 1.2, pch = pch)
+  text(0.0, vridge[1,], colnames(vridge), pos = 4)
+  genridge::traceplot(bodyfat_ridge_lm)
+  par(mfrow = c(1, 1))
+}
+
 #' (Stat 5100 function) Obtain a QQ plot for a linear model. This plot can
 #' help you assess the normality assumption of a linear regression model. This
 #' plot will plot theoretical quantiles of a normal distribution against the
