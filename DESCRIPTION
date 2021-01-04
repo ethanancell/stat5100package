@@ -16,5 +16,7 @@ Imports:
     glmnet,
     MASS,
     olsrr,
-    onewaytests
+    onewaytests,
+    rpart,
+    rpart.plot
 RoxygenNote: 7.1.1
