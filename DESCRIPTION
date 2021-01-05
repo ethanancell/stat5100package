@@ -12,11 +12,13 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports:
+    forecast,
     genridge,
     glmnet,
     MASS,
     olsrr,
     onewaytests,
+    pROC,
     rpart,
     rpart.plot
 RoxygenNote: 7.1.1
