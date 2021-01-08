@@ -147,7 +147,7 @@ ridge_vif_trace_plot <- function(ridgeobject) {
           ylab = "Variance inflation", main = "Ridge Regression Analysis",
           cex = 1.2, pch = pch)
   text(0.0, vridge[1,], colnames(vridge), pos = 4)
-  genridge::traceplot(bodyfat_ridge_lm)
+  genridge::traceplot(ridgeobject)
   par(mfrow = c(1, 1))
 }
 
