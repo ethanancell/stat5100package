@@ -20,6 +20,7 @@ Imports:
     olsrr,
     onewaytests,
     pROC,
+    ResourceSelection,
     rpart,
     rpart.plot
 RoxygenNote: 7.1.1

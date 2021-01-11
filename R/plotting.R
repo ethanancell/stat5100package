@@ -69,6 +69,60 @@ fit_plot_quadratic_model <- function(lmobject, ...) {
   abline(a = intercept, b = coeff)
 }
 
+#' (Stat 5100 function) Plot influence diagnostics for a logistic regression
+#' model.
+#'
+#' @param glmobject An object from the glm() function that has a binomial family
+#' (logistic regression)
+#' @return A grid of four plots that shows various influence diagnostics.
+logistic_influence_diagnostics <- function(glmobject) {
+
+  N <- length(residuals(glmobject))
+  fitted_prob <- fitted(glmobject)
+  # Get hat matrix (useful for some of these plots)
+  H <- hatvalues(glmobject)
+
+  # ====================================
+
+  # Fit models without each of the observations (leave one out)
+  # (these are all clumped together for computation purposes)
+
+  dev_i <- vector("numeric", length = N)
+  chisq_i <- vector("numeric", length = N)
+  for (i in 1:N) {
+    new_logreg_df <- glmobject$model[-i, ]
+    new_glmmodel <- glm(glmobject$formula, data = new_logreg_df,
+                        family = "binomial")
+    dev_i[i] <- new_glmmodel$deviance
+    chisq_i[i] <- sum(residuals(new_glmmodel, type = "pearson")^2)
+  }
+
+  # =========================
+
+  par(mfrow = c(2, 1))
+
+  # Chi-squared deletion difference
+  # chisq <- sum(residuals(glmobject, type = "pearson")^2)
+  # plot(fitted_prob, chisq - chisq_i, type = "n",
+  #      ylab = "Chi-square Deletion Difference", xlab = "Predicted Probability")
+  # text(fitted_prob, chisq - chisq_i, labels = 1:N)
+
+  # Deviance deletion difference
+  plot(fitted_prob, glmobject$deviance - dev_i, type = "n",
+       ylab = "Deviance Deletion Difference", xlab = "Predicted Probability")
+  text(fitted_prob, glmobject$deviance - dev_i, labels = 1:N)
+
+  # CI Displacements
+  # Pending....
+
+  # Leverage
+  plot(fitted_prob, H, xlab = "Predicted Probability", ylab = "Leverage",
+       type = "n")
+  text(fitted_prob, H, labels = 1:N)
+
+  par(mfrow = c(1, 1))
+}
+
 #' (Stat 5100 function) Obtain a residual plot for a linear model. This helps you decide on the
 #' appropriateness of linear regression model assumptions.
 #'
@@ -149,6 +203,61 @@ ridge_vif_trace_plot <- function(ridgeobject) {
   text(0.0, vridge[1,], colnames(vridge), pos = 4)
   genridge::traceplot(ridgeobject)
   par(mfrow = c(1, 1))
+}
+
+#' (Stat 5100 function) Simulated envelope plot for logistic regression models
+#'
+#' @param glmobject An object from the glm() function. Ensure that the family of
+#' the glm object is binomial.
+#' @return A simulated envelope plot to check for outliers.
+simulated_envelope_logreg <- function(glmobject) {
+  # Extract useful information
+  fitted_prob <- fitted(glmobject)
+  N <- length(glmobject$residuals)
+  X <- glmobject$model
+
+  # Repeated 19 times:
+  ordered_abs_dev_all <- vector()
+  for (simulation_num in 1:19) {
+    # Step 1: for each of the n cases, generate Bernoulli outcome where
+    # the Bernoulli parameter is \hat{\pi}_i
+    bernoulli_outcome <- vector(mode = "numeric", length = N)
+    for (i in 1:N) {
+      bernoulli_outcome[i] <- rbinom(1, 1, prob = fitted_prob[i])
+    }
+
+    # Step 2: Fit a logistic regression model with the new vector of
+    # responses (keeping original predictors) and obtain ordered
+    # absolute deviance residuals.
+    new_logreg_df <- X
+    new_logreg_df[[as.character(attributes(glmobject$terms)$variables[[2]])]] <-
+      bernoulli_outcome
+    new_logreg <- glm(glmobject$formula, data = new_logreg_df,
+                      family = "binomial")
+    ordered_abs_dev <- sort(abs(residuals(new_logreg, type = "deviance")))
+    ordered_abs_dev_all <- rbind(ordered_abs_dev_all, ordered_abs_dev)
+  }
+
+  # Step 3:
+  # Get minimum, mean, and maximum values across all 19 groups
+  min_abs_dev_all <- apply(ordered_abs_dev_all, 2, min)
+  max_abs_dev_all <- apply(ordered_abs_dev_all, 2, max)
+  mean_abs_dev_all <- apply(ordered_abs_dev_all, 2, mean)
+
+  # Get expected values for ordered residuals
+  expected_values <- vector("numeric", length = N)
+  for (i in 1:N) {
+    expected_values[i] <- qnorm((i + N - (1/8)) / (2*N + (1/2)))
+  }
+
+  plot(expected_values, sort(abs(residuals(glmobject, type = "deviance"))),
+       xlab = "Expected value", ylab = "Absolute Deviance Residuals",
+       main = "Half-Normal Probability Plot with Simulated Envelope",
+       pch = 16)
+  # Min, mean, and maximum lines
+  lines(expected_values, min_abs_dev_all, type = "l")
+  lines(expected_values, max_abs_dev_all, type = "l")
+  lines(expected_values, mean_abs_dev_all, type = "l")
 }
 
 #' (Stat 5100 function) Obtain a QQ plot for a linear model. This plot can
