@@ -99,13 +99,27 @@ logistic_influence_diagnostics <- function(glmobject) {
 
   # =========================
 
-  par(mfrow = c(2, 1))
+  par(mfrow = c(2, 2))
 
   # Chi-squared deletion difference
   # chisq <- sum(residuals(glmobject, type = "pearson")^2)
   # plot(fitted_prob, chisq - chisq_i, type = "n",
   #      ylab = "Chi-square Deletion Difference", xlab = "Predicted Probability")
   # text(fitted_prob, chisq - chisq_i, labels = 1:N)
+
+  # Pearson Residual
+  plot(1:N, residuals(glmobject, type = "pearson"), type = "n",
+       xlab = "Observation #", ylab = "Pearson Residual",
+       main = "Influence diagnostic #1")
+  abline(a = 0, b = 0)
+  text(1:N, residuals(glmobject, type = "pearson"), labels = 1:N)
+
+  # Deviance Residual
+  plot(1:N, residuals(glmobject, type = "deviance"), type = "n",
+       xlab = "Observation #", ylab = "Deviance Residual",
+       main = "Influence diagnostic #2")
+  abline(a = 0, b = 0)
+  text(1:N, residuals(glmobject, type = "deviance"), labels = 1:N)
 
   # Deviance deletion difference
   plot(fitted_prob, glmobject$deviance - dev_i, type = "n",
