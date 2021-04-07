@@ -79,6 +79,10 @@ logistic_influence_diagnostics <- function(glmobject) {
 
   N <- length(residuals(glmobject))
   fitted_prob <- fitted(glmobject)
+  
+  # Store residual labels (defaults to row numbers)
+  labels <- names(shuttle_logreg$residuals)
+  
   # Get hat matrix (useful for some of these plots)
   H <- hatvalues(glmobject)
 
@@ -105,26 +109,26 @@ logistic_influence_diagnostics <- function(glmobject) {
   # chisq <- sum(residuals(glmobject, type = "pearson")^2)
   # plot(fitted_prob, chisq - chisq_i, type = "n",
   #      ylab = "Chi-square Deletion Difference", xlab = "Predicted Probability")
-  # text(fitted_prob, chisq - chisq_i, labels = 1:N)
+  # text(fitted_prob, chisq - chisq_i, labels = labels )
 
   # Pearson Residual
   plot(1:N, residuals(glmobject, type = "pearson"), type = "n",
        xlab = "Observation #", ylab = "Pearson Residual",
        main = "Influence diagnostic #1")
   abline(a = 0, b = 0)
-  text(1:N, residuals(glmobject, type = "pearson"), labels = 1:N)
+  text(1:N, residuals(glmobject, type = "pearson"), labels = labels )
 
   # Deviance Residual
   plot(1:N, residuals(glmobject, type = "deviance"), type = "n",
        xlab = "Observation #", ylab = "Deviance Residual",
        main = "Influence diagnostic #2")
   abline(a = 0, b = 0)
-  text(1:N, residuals(glmobject, type = "deviance"), labels = 1:N)
+  text(1:N, residuals(glmobject, type = "deviance"), labels = labels )
 
   # Deviance deletion difference
   plot(fitted_prob, glmobject$deviance - dev_i, type = "n",
        ylab = "Deviance Deletion Difference", xlab = "Predicted Probability")
-  text(fitted_prob, glmobject$deviance - dev_i, labels = 1:N)
+  text(fitted_prob, glmobject$deviance - dev_i, labels = labels )
 
   # CI Displacements
   # Pending....
@@ -132,7 +136,7 @@ logistic_influence_diagnostics <- function(glmobject) {
   # Leverage
   plot(fitted_prob, H, xlab = "Predicted Probability", ylab = "Leverage",
        type = "n")
-  text(fitted_prob, H, labels = 1:N)
+  text(fitted_prob, H, labels = labels )
 
   par(mfrow = c(1, 1))
 }
