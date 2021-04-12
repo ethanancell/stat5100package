@@ -17,6 +17,7 @@ Imports:
     genridge,
     glmnet,
     MASS,
+    mgcv,
     nnet,
     olsrr,
     onewaytests,
